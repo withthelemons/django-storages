@@ -14,7 +14,7 @@ from django.utils.encoding import (
     filepath_to_uri, force_bytes, force_text, smart_str,
 )
 
-from storages.backends.base import BaseStorage, BaseFile
+from storages.backends.base import BaseFile, BaseStorage
 from storages.utils import (
     check_location, clean_name, get_available_overwrite_name, lookup_env,
     safe_join, setting,

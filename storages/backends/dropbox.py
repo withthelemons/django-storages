@@ -21,7 +21,7 @@ from dropbox import Dropbox
 from dropbox.exceptions import ApiError
 from dropbox.files import CommitInfo, UploadSessionCursor
 
-from storages.backends.base import BaseStorage, BaseFile
+from storages.backends.base import BaseFile, BaseStorage
 from storages.utils import setting
 
 DATE_FORMAT = '%a, %d %b %Y %X +0000'

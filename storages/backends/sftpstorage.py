@@ -16,7 +16,7 @@ import paramiko
 from django.utils.deconstruct import deconstructible
 from django.utils.six.moves.urllib import parse as urlparse
 
-from storages.backends.base import BaseStorage, BaseFile
+from storages.backends.base import BaseFile, BaseStorage
 from storages.utils import setting
 
 
