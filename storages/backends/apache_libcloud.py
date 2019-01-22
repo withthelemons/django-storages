@@ -9,6 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.deconstruct import deconstructible
 from django.utils.six import string_types
 from django.utils.six.moves.urllib.parse import urljoin
+
 from storages.backends.base import BaseFile, BaseStorage
 
 try:
