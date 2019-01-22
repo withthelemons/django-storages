@@ -15,14 +15,13 @@ from shutil import copyfileobj
 from tempfile import SpooledTemporaryFile
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils._os import safe_join
 from django.utils.deconstruct import deconstructible
 from dropbox import Dropbox
 from dropbox.exceptions import ApiError
 from dropbox.files import CommitInfo, UploadSessionCursor
 
+from storages.backends.base import BaseStorage, BaseFile
 from storages.utils import setting
 
 DATE_FORMAT = '%a, %d %b %Y %X +0000'
@@ -32,7 +31,7 @@ class DropBoxStorageException(Exception):
     pass
 
 
-class DropBoxFile(File):
+class DropBoxFile(BaseFile):
     def __init__(self, name, storage):
         self.name = name
         self._storage = storage
@@ -48,7 +47,7 @@ class DropBoxFile(File):
 
 
 @deconstructible
-class DropBoxStorage(Storage):
+class DropBoxStorage(BaseStorage):
     """DropBox Storage class for Django pluggable storage system."""
 
     CHUNK_SIZE = 4 * 1024 * 1024
@@ -111,6 +110,7 @@ class DropBoxStorage(Storage):
         return remote_file
 
     def _save(self, name, content):
+        name, content = self.pre_save(name, content)
         content.open()
         if content.size <= self.CHUNK_SIZE:
             self.client.files_upload(content.read(), self._full_path(name))

@@ -8,14 +8,13 @@ from tempfile import SpooledTemporaryFile
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
-from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils import timezone as tz
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import (
     filepath_to_uri, force_bytes, force_text, smart_str,
 )
 
+from storages.backends.base import BaseStorage, BaseFile
 from storages.utils import (
     check_location, clean_name, get_available_overwrite_name, lookup_env,
     safe_join, setting,
@@ -50,7 +49,7 @@ warnings.warn(
 
 
 @deconstructible
-class S3BotoStorageFile(File):
+class S3BotoStorageFile(BaseFile):
     """
     The default file object used by the S3BotoStorage backend.
 
@@ -183,7 +182,7 @@ class S3BotoStorageFile(File):
 
 
 @deconstructible
-class S3BotoStorage(Storage):
+class S3BotoStorage(BaseStorage):
     """
     Amazon Simple Storage Service using Boto
 
@@ -403,6 +402,7 @@ class S3BotoStorage(Storage):
         return f
 
     def _save(self, name, content):
+        name, content = self.pre_save(name, content)
         cleaned_name = self._clean_name(name)
         name = self._normalize_name(cleaned_name)
         headers = self.headers.copy()

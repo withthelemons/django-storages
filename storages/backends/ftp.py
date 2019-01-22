@@ -21,11 +21,10 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 from django.utils.six.moves.urllib import parse as urlparse
 
+from storages.backends.base import BaseStorage, BaseFile
 from storages.utils import setting
 
 
@@ -34,7 +33,7 @@ class FTPStorageException(Exception):
 
 
 @deconstructible
-class FTPStorage(Storage):
+class FTPStorage(BaseStorage):
     """FTP Storage class for Django pluggable storage system."""
 
     def __init__(self, location=None, base_url=None):
@@ -151,6 +150,7 @@ class FTPStorage(Storage):
             raise FTPStorageException('Error reading file %s' % name)
 
     def _save(self, name, content):
+        name, content = self.pre_save(name, content)
         content.open()
         self._start_connection()
         self._put_file(name, content)
@@ -245,7 +245,7 @@ class FTPStorage(Storage):
         return urlparse.urljoin(self._base_url, name).replace('\\', '/')
 
 
-class FTPStorageFile(File):
+class FTPStorageFile(BaseFile):
     def __init__(self, name, storage, mode):
         self.name = name
         self._storage = storage

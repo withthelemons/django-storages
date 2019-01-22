@@ -13,16 +13,15 @@ import stat
 from datetime import datetime
 
 import paramiko
-from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 from django.utils.six.moves.urllib import parse as urlparse
 
+from storages.backends.base import BaseStorage, BaseFile
 from storages.utils import setting
 
 
 @deconstructible
-class SFTPStorage(Storage):
+class SFTPStorage(BaseStorage):
 
     def __init__(self, host=None, params=None, interactive=None, file_mode=None,
                  dir_mode=None, uid=None, gid=None, known_host_file=None,
@@ -123,6 +122,7 @@ class SFTPStorage(Storage):
 
     def _save(self, name, content):
         """Save file via SFTP."""
+        name, content = self.pre_save(name, content)
         content.open()
         path = self._remote_path(name)
         dirname = posixpath.dirname(path)
@@ -190,7 +190,7 @@ class SFTPStorage(Storage):
         return urlparse.urljoin(self._base_url, name).replace('\\', '/')
 
 
-class SFTPStorageFile(File):
+class SFTPStorageFile(BaseFile):
     def __init__(self, name, storage, mode):
         self.name = name
         self.mode = mode

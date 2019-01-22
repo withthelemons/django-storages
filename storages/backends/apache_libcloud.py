@@ -6,11 +6,10 @@ import os
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 from django.utils.six import string_types
 from django.utils.six.moves.urllib.parse import urljoin
+from storages.backends.base import BaseStorage, BaseFile
 
 try:
     from libcloud.storage.providers import get_driver
@@ -20,7 +19,7 @@ except ImportError:
 
 
 @deconstructible
-class LibCloudStorage(Storage):
+class LibCloudStorage(BaseStorage):
     """Django storage derived class using apache libcloud to operate
     on supported providers"""
     def __init__(self, provider_name=None, option=None):
@@ -155,11 +154,13 @@ class LibCloudStorage(Storage):
         return next(self.driver.download_object_as_stream(obj, obj.size))
 
     def _save(self, name, file):
+        # TODO: pre_save
+        # name, content = self.pre_save(name, content)
         self.driver.upload_object_via_stream(iter(file), self._get_bucket(), name)
         return name
 
 
-class LibCloudFile(File):
+class LibCloudFile(BaseFile):
     """File inherited class for libcloud storage objects read and write"""
     def __init__(self, name, storage, mode):
         self.name = name

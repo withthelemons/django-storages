@@ -10,18 +10,18 @@ from azure.storage.blob import BlobPermissions, ContentSettings
 from azure.storage.common import CloudStorageAccount
 from django.core.exceptions import SuspiciousOperation
 from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import force_bytes, force_text
 
+from storages.backends.base import BaseStorage, BaseFile
 from storages.utils import (
     clean_name, get_available_overwrite_name, safe_join, setting,
 )
 
 
 @deconstructible
-class AzureStorageFile(File):
+class AzureStorageFile(BaseFile):
 
     def __init__(self, name, mode, storage):
         self.name = name
@@ -133,7 +133,7 @@ _AZURE_NAME_MAX_LEN = 1024
 
 
 @deconstructible
-class AzureStorage(Storage):
+class AzureStorage(BaseStorage):
 
     account_name = setting("AZURE_ACCOUNT_NAME")
     account_key = setting("AZURE_ACCOUNT_KEY")
@@ -220,6 +220,7 @@ class AzureStorage(Storage):
         return properties.content_length
 
     def _save(self, name, content):
+        name, content = self.pre_save(name, content)
         name_only = self.get_valid_name(name)
         name = self._get_valid_path(name)
         guessed_type, content_encoding = mimetypes.guess_type(name)

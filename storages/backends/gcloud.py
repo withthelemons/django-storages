@@ -3,12 +3,11 @@ from datetime import timedelta
 from tempfile import SpooledTemporaryFile
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
-from django.core.files.base import File
-from django.core.files.storage import Storage
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import force_bytes, smart_str
 
+from storages.backends.base import BaseStorage, BaseFile
 from storages.utils import (
     check_location, clean_name, get_available_overwrite_name, safe_join,
     setting,
@@ -23,7 +22,7 @@ except ImportError:
                                "See https://github.com/GoogleCloudPlatform/gcloud-python")
 
 
-class GoogleCloudFile(File):
+class GoogleCloudFile(BaseFile):
     def __init__(self, name, mode, storage):
         self.name = name
         self.mime_type = mimetypes.guess_type(name)[0]
@@ -82,7 +81,7 @@ class GoogleCloudFile(File):
 
 
 @deconstructible
-class GoogleCloudStorage(Storage):
+class GoogleCloudStorage(BaseStorage):
     project_id = setting('GS_PROJECT_ID')
     credentials = setting('GS_CREDENTIALS')
     bucket_name = setting('GS_BUCKET_NAME')
@@ -167,6 +166,7 @@ class GoogleCloudStorage(Storage):
         return file_object
 
     def _save(self, name, content):
+        name, content = self.pre_save(name, content)
         cleaned_name = clean_name(name)
         name = self._normalize_name(cleaned_name)
 
